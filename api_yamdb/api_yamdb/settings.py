@@ -139,5 +139,5 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 REST_AUTH_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'auth.serializers.CustomJWTSerializer'
+    'REGISTER_SERIALIZER': 'auth.serializers.CustomSignUpSerializer'
 }
