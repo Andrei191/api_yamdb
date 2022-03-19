@@ -1,11 +1,10 @@
 from rest_framework import serializers
 from users.models import User
 from rest_framework.validators import UniqueValidator
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class CustomJWTSerializer(serializers.Serializer):
     email = serializers.EmailField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
