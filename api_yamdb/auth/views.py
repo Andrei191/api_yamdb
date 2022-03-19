@@ -54,7 +54,8 @@ class CustomAuthToken(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         username = request.data.get('username')
         user = get_object_or_404(User, username=username)
-        if request.data['confirmation_code'] == '12345':
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.data['confirmation_code'] != '12346':
+            error = 'Invalid verification code'
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
