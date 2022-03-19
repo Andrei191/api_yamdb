@@ -1,12 +1,28 @@
+from rest_framework import serializers
+from users.models import User
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomJWTSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.CharField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
 
-    @classmethod
-    def get_token(cls, user):
-        token = super(MyTokenObtainPairSerializer, cls).get_token(user)
+    class Meta:
+        model = User
+        fields = ('email', 'username')
 
-        # Add custom claims
-        token['username'] = user.username
-        return token
+    def create(self, validated_data):
+        user = User.objects.create(
+            email=validated_data['email'],
+            username=validated_data['username']
+        )
+        user.save()
+
+        return user
