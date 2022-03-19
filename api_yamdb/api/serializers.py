@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
+from users.models import User
+
+from .permissions import IsAdminOrReadOnlyPermission
 
 from reviews.models import Comment, Genre, Category, Review, Title  # isort:skip
-
 
 class TitleSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(slug_field='name', read_only=True)
@@ -15,14 +17,6 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
-    )
-    review = serializers.SlugField(
-        read_only=True,
-        slug_field='id'
-    )
 
     class Meta:
         model = Comment
@@ -30,6 +24,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    permission_classes = (IsAdminOrReadOnlyPermission, )
     class Meta:
         model = Category
         fields = '__all__'
@@ -42,13 +37,13 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True,
-        default=serializers.CurrentUserDefault()
-    )
-    title = serializers.SlugRelatedField(queryset=Title.objects.all(),
-                                             slug_field='name',)
+    #author = serializers.SlugRelatedField(
+    #    slug_field='username',
+    #    read_only=True,
+    #    default=serializers.CurrentUserDefault()
+    #)
+    #title = serializers.SlugRelatedField(queryset=Title.objects.all(),
+    #                                         slug_field='name',)
 
     class Meta:
         model = Review
@@ -59,3 +54,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         ]
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
