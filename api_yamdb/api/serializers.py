@@ -38,11 +38,15 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Review
         fields = ('title', 'author')
+        read_only_fields = ('post',)
         validators = [
             UniqueTogetherValidator(
                 queryset=Review.objects.all(), fields=('title', 'author')

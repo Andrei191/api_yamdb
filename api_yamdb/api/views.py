@@ -44,17 +44,17 @@ class GenreViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    #permission_classes = (IsAuthorOrReadOnlyPermission,IsModerOrReadOnlyPermission, IsAdminOrReadOnlyPermission)
+    permission_classes = (IsAuthorOrReadOnlyPermission,)
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
-        review = Review.objects.filter(title_id=title_id)
-        return review
+        title = get_object_or_404(Title, id=title_id)
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
-        review = get_object_or_404(Review, title_id=title_id)
-        serializer.save(author=self.request.user, review=review)
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(author=self.request.user, title=title)
 
 
 class UserViewSet(viewsets.ModelViewSet):

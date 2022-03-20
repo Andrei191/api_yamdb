@@ -1,12 +1,12 @@
-from users.models import User
-from .serializers import CustomSignUpSerializer, ObtainTokenSerializer
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework import status
 from django.core import mail
-from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
+from rest_framework import generics, status
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from users.models import User
+
+from .serializers import CustomSignUpSerializer, ObtainTokenSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -54,7 +54,7 @@ class CustomAuthToken(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         username = request.data.get('username')
         user = get_object_or_404(User, username=username)
-        if request.data['confirmation_code'] != '12346':
+        if request.data['confirmation_code'] != '12345':
             error = 'Invalid verification code'
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
         token, created = Token.objects.get_or_create(user=user)
