@@ -38,15 +38,19 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(slug_field="name", read_only=True)
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        slug_field="username", read_only=True
     )
+
+    def validate_score(self, value):
+        if 0 > value > 10:
+            raise serializers.ValidationError("Оценка по 10-бальной шкале!")
+        return value
 
     class Meta:
         model = Review
-        fields = ('title', 'author')
-        read_only_fields = ('post',)
+        fields = ('title', 'author', 'score')
         validators = [
             UniqueTogetherValidator(
                 queryset=Review.objects.all(), fields=('title', 'author')
