@@ -1,17 +1,44 @@
+import datetime as dt
+from typing_extensions import Required
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Comment, Genre, Category, Review, Title  # isort:skip
+from reviews.models import Comment, Genre, Category, Review, Title 
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    category = SlugRelatedField(slug_field='name', read_only=True)
-    genre = SlugRelatedField(slug_field='name', read_only=True)
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = SlugRelatedField(read_only=True, many=False)
+    genre = SlugRelatedField(read_only=True, many=True)
+    raiting = serializers.IntegerField(read_only=True, Required=False)
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'rating', 'description', 'ganre', 'category')
         model = Title
+
+    def get_rating (self, obj):
+        pass
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queriset = Category.objects.all(), 
+        slug_field='slug'
+    )
+    genre = SlugRelatedField(
+        queriset = Category.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+
+    class Meta:
+        fields = ('name', 'year', 'rating', 'description', 'ganre', 'category')
+        model = Title
+
+    def validate_year(self, value):
+        year = dt.date.today().year
+        if not (0 < value <= year):
+            raise serializers.ValidationError("Некорректный год")
+        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -32,7 +59,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
