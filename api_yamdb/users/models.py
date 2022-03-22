@@ -9,9 +9,19 @@ ROLES = (
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=150, unique=True, null=True)
-    email = models.EmailField(max_length=254, unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
-    bio = models.TextField(blank=True)
+    email = models.EmailField("emailaddress", unique=True)
+    bio = models.TextField(max_length=500, blank=True)
+    confirmation_code = models.CharField(max_length=50, blank=True)
     role = models.CharField(max_length=50, choices=ROLES, default='user')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["username", "email"],
+                                    name="unique_user")
+        ]
+
+    def is_admin(self):
+        return self.role == "admin" or self.is_staff
+
+    def is_moderator(self):
+        return self.role == "moderator"

@@ -1,35 +1,36 @@
 import datetime as dt
 
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
 
-from .permissions import IsAdminOrReadOnlyPermission
-
-from reviews.models import Comment, Genre, Category, Review, Title  # isort:skip
+from reviews.models import (Comment, Genre,  # isort:skip
+                            Category, Review, Title)  # isort:skip
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('name','slug','id')
+        fields = ('name', 'slug',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ('name','slug',)
+        fields = ('name', 'slug',)
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True,)
     genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.IntegerField(read_only=True, default=0)
+    rating = serializers.IntegerField(source="reviews__score__avg",
+                                      read_only=True,)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
+        fields = ('id', 'name', 'year', 'description',
+                  'genre', 'category', 'rating',)
         read_only_fields = fields
 
 
@@ -43,22 +44,24 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'genre', 'category',)
+        fields = ('id', 'name', 'year', 'description',
+                  'genre', 'category', 'rating')
 
     def validate_year(self, value):
         year = dt.date.today().year
-        if not (year - 2000000 < value <= year):
+        if not (year - 386 < value <= year):
             raise serializers.ValidationError("Проверьте год произведения!")
         return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    review = serializers.SlugRelatedField(slug_field="text", read_only=True)
+    author = serializers.SlugRelatedField(slug_field="username",
+                                          read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text', 'created')
-        read_only_fields = ('id',)
-
+        fields = "__all__"
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -72,14 +75,22 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Оценка по 10-бальной шкале!")
         return value
 
+    def validate(self, data):
+        request = self.context["request"]
+        author = request.user
+        title_id = self.context.get("view").kwargs.get("title_id")
+        title = get_object_or_404(Title, pk=title_id)
+        if (
+            request.method == "POST"
+            and Review.objects.filter(title=title, author=author).exists()
+        ):
+            raise ValidationError("Вы уже написали отзыв!")
+        return data
+
     class Meta:
+        fields = "__all__"
         model = Review
-        fields = ('id', 'title', 'author', 'score')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(), fields=('title', 'author')
-            )
-        ]
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
