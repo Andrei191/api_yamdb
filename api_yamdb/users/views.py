@@ -1,5 +1,5 @@
 from rest_framework import filters, viewsets
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from users.models import User
 from users.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
