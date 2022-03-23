@@ -7,6 +7,7 @@ from rest_framework import status
 from django.core import mail
 from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.tokens import AccessToken
 
 
 class RegisterView(generics.CreateAPIView):
@@ -57,5 +58,5 @@ class CustomAuthToken(generics.CreateAPIView):
         if request.data['confirmation_code'] != '12346':
             error = 'Invalid verification code'
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+        token = AccessToken.for_user(user)
+        return Response({"token": f"{token}"}, status=status.HTTP_200_OK)
