@@ -3,7 +3,8 @@ from rest_framework import routers
 from rest_framework.authtoken import views
 
 from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
-                    ReviewViewSet, TitleViewSet, UserViewSet)
+                    ReviewViewSet, TitleViewSet)
+from users.views import UserViewSet
 
 app_name = 'api'
 
@@ -21,4 +22,3 @@ router.register('users', UserViewSet)
 urlpatterns = [
     path('v1/', include(router.urls)),
 ]
-
