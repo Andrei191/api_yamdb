@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.core import mail
-from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -16,11 +15,6 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = CustomSignUpSerializer
 
     def post(self, request):
-        # проверяем: если юзера нет - создаём его и отправляем код
-        # если юзера есть - отправляем код повторно без создания
-        # проблема - повторная отправка не работает...
-        # потому что проверка уникальности (.is_valid) идёт раньше и
-        # запрос просто не проходит
         serializer = CustomSignUpSerializer(data=request.data)
         if serializer.is_valid():
             if not User.objects.filter(
