@@ -23,7 +23,7 @@ class RegisterView(generics.CreateAPIView):
             ).exists():
                 mail.send_mail(
                     'Yamdb confirmation code',
-                    '12345',
+                    '12346',
                     'from@example.com',
                     [request.data['email']],
                 )
@@ -31,7 +31,7 @@ class RegisterView(generics.CreateAPIView):
             else:
                 mail.send_mail(
                     'Yambd confirmation code reminder',
-                    '12345',
+                    '12346',
                     'from@example.com',
                     [request.data['email']],
                 )
