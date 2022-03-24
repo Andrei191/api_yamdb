@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
@@ -9,13 +10,27 @@ ROLES = (
 )
 
 
+def max_length_role(array):
+    maxi = 0
+    for elem in array:
+        if len(elem[0]) > maxi:
+            maxi = len(elem[0])
+    return maxi
+
+
 class User(AbstractUser):
-    username = models.CharField(max_length=150, unique=True)
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='incorrect username')])
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=50, choices=ROLES, default='user')
+    role = models.CharField(max_length=max_length_role(ROLES),
+                            choices=ROLES, default='user')
     confirmation_code = models.CharField(max_length=60, blank=True)
 
     class Meta:

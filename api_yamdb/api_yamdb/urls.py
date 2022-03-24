@@ -5,12 +5,12 @@ from rest_framework.authtoken import views
 
 urlpatterns = [
     path('api-token-auth/', views.obtain_auth_token),
-    path("admin/", admin.site.urls),
-    path("api/", include("api.urls")),
+    path('admin/', admin.site.urls),
+    path('api/', include("api.urls")),
     path(
-        "redoc/",
-        TemplateView.as_view(template_name="redoc.html"),
-        name="redoc",
+        'redoc/',
+        TemplateView.as_view(template_name='redoc.html'),
+        name='redoc',
     ),
     path('api/v1/auth/', include('auth.urls')),
 ]

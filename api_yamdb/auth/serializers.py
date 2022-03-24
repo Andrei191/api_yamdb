@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from users.models import User
 from rest_framework.validators import UniqueValidator
+
+from users.models import User  # isort: skip
 
 
 class CustomSignUpSerializer(serializers.Serializer):
