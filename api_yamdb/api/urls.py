@@ -5,6 +5,7 @@ from .views import (CategoryViewSet, CommentViewSet,  # isort:skip
                     GenreViewSet,  # isort:skip
                     ReviewViewSet, TitleViewSet)  # isort:skip
 from users.views import UserViewSet  # isort:skip
+from .views import registration, CustomAuthToken
 
 router = routers.DefaultRouter()
 router.register('categories', CategoryViewSet)
@@ -20,4 +21,6 @@ router.register('users', UserViewSet)
 
 urlpatterns = [
     path('v1/', include(router.urls)),
+    path('v1/auth/token/', CustomAuthToken.as_view(), name='token_obtain_pair'),
+    path('v1/auth/signup/', registration),
 ]
