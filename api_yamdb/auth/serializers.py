@@ -1,5 +1,5 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from users.models import User  # isort: skip
 
@@ -7,30 +7,19 @@ from users.models import User  # isort: skip
 class CustomSignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        max_length=254,
     )
-    username = serializers.CharField(
-        required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
+    username = serializers.CharField(required=True,)
 
     class Meta:
         model = User
         fields = ('email', 'username')
 
-    def validate(self, data):
-        if data['username'] == 'me':
-            raise serializers.ValidationError('Invalid nickname')
-        return data
-
-    def create(self, validated_data):
-        user = User.objects.create(
-            email=validated_data['email'],
-            username=validated_data['username']
-        )
-        user.save()
-
-        return user
+    def validate(self, value):
+        username = value['username']
+        if username == 'me':
+            raise ValidationError("Недопустимое имя")
+        return value
 
 
 class ObtainTokenSerializer(serializers.Serializer):
