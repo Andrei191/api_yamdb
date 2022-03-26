@@ -1,15 +1,16 @@
-from django.core import mail
 from django.contrib.auth.tokens import default_token_generator
+from django.core import mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (filters, mixins, permissions, viewsets,
-                           generics, status)
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import (filters, generics, mixins, permissions, status,
+                            viewsets)
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework_simplejwt import tokens
+from users.models import User
 
 from .filters import TitleFilter  # isort:skip
 from .permissions import (AuthorOrModerPermission,  # isort:skip
@@ -21,7 +22,6 @@ from .serializers import (CategorySerializer, CommentSerializer,  # isort:skip
                           CustomSignUpSerializer,
                           ObtainTokenSerializer)  # isort:skip
 from reviews.models import Category, Genre, Review, Title  # isort:skip
-from users.models import User
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -105,9 +105,15 @@ def registration(request):
     if serializer.is_valid(raise_exception=True):
         username = serializer.validated_data.get("username")
         email = serializer.validated_data.get("email")
-        user, created = User.objects.get_or_create(username=username,
-                                                   email=email)
-        confirmation_code = default_token_generator.make_token(user)
+        try:
+            user, created = User.objects.get_or_create(username=username,
+                                                       email=email)
+            confirmation_code = default_token_generator.make_token(user)
+        except Exception:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
         mail.send_mail(
             'Yamdb confirmation code',
             confirmation_code,
@@ -115,7 +121,6 @@ def registration(request):
             [request.data['email']],
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomAuthToken(generics.CreateAPIView):
