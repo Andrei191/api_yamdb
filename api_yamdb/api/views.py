@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt import tokens
 from users.models import User
 
+from api_yamdb.settings import DEFAULT_FROM_EMAIL # isort:skip
 from .filters import TitleFilter  # isort:skip
 from .permissions import (AuthorOrModerPermission,  # isort:skip
                           IsAdminOrReadOnlyPermission)  # isort:skip
@@ -117,7 +118,7 @@ def registration(request):
         mail.send_mail(
             'Yamdb confirmation code',
             confirmation_code,
-            'from@example.com',
+            DEFAULT_FROM_EMAIL,
             [request.data['email']],
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
