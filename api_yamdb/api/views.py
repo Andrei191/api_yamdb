@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt import tokens
 from users.models import User
 
+from api_yamdb.settings import DEFAULT_FROM_EMAIL  # isort:skip
 from .filters import TitleFilter  # isort:skip
 from .permissions import (AuthorOrModerPermission,  # isort:skip
                           IsAdminOrReadOnlyPermission)  # isort:skip
@@ -102,25 +103,25 @@ class ReviewViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def registration(request):
     serializer = CustomSignUpSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        username = serializer.validated_data.get("username")
-        email = serializer.validated_data.get("email")
-        try:
-            user, created = User.objects.get_or_create(username=username,
-                                                       email=email)
-            confirmation_code = default_token_generator.make_token(user)
-        except Exception:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        mail.send_mail(
-            'Yamdb confirmation code',
-            confirmation_code,
-            'from@example.com',
-            [request.data['email']],
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data.get("username")
+    email = serializer.validated_data.get("email")
+    try:
+        user, created = User.objects.get_or_create(username=username,
+                                                   email=email)
+        confirmation_code = default_token_generator.make_token(user)
+    except Exception:
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    mail.send_mail(
+        'Yamdb confirmation code',
+        confirmation_code,
+        DEFAULT_FROM_EMAIL,
+        [request.data['email']],
+    )
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CustomAuthToken(generics.CreateAPIView):
@@ -131,11 +132,11 @@ class CustomAuthToken(generics.CreateAPIView):
     def post(self, request):
         serializer = ObtainTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get("username")
+        username = serializer.validated_data.get('username')
         confirmation_code = serializer.data.get('confirmation_code')
         user = get_object_or_404(User, username=username)
         if default_token_generator.check_token(user, confirmation_code):
             token = tokens.AccessToken.for_user(user)
             return Response({'token': f'{token}'}, status=status.HTTP_200_OK)
-        return Response({'confirmation_code': 'Invalid confirmation code'},
+        return Response({'confirmation_code': 'Неверный код подтверждения'},
                         status=status.HTTP_400_BAD_REQUEST)

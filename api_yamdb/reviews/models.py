@@ -16,7 +16,7 @@ class Genre(models.Model):
         unique=True,
         validators=[RegexValidator(
             regex=r'^[-a-zA-Z0-9_]+$',
-            message='incorrect username')])
+            message='Недопустимый никнейм')])
 
     def __str__(self):
         return self.name
@@ -28,7 +28,12 @@ class Genre(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=256, unique=True)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        validators=[RegexValidator(
+            regex=r'^[-a-zA-Z0-9_]+$',
+            message='Недопустимый никнейм')])
 
     def __str__(self):
         return self.name
@@ -42,7 +47,7 @@ class Title(models.Model):
     name = models.TextField()
     current_year = dt.date.today().year
     year = models.IntegerField(
-        validators=[MinValueValidator(-386),
+        validators=[MinValueValidator(-386000),
                     MaxValueValidator(int(current_year))],
         default=None,
     )

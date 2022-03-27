@@ -1,5 +1,3 @@
-import datetime as dt
-
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -47,12 +45,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'description',
                   'genre', 'category', 'rating')
 
-    def validate_year(self, value):
-        year = dt.date.today().year
-        if not (year - 386 < value <= year):
-            raise serializers.ValidationError('Проверьте год произведения!')
-        return value
-
 
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(slug_field='text', read_only=True)
@@ -92,18 +84,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = '__all__'
-
-
 class CustomSignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(
         required=True,
         max_length=254,
     )
-    username = serializers.CharField(required=True,)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=150
+    )
 
     class Meta:
         model = User
@@ -112,14 +102,37 @@ class CustomSignUpSerializer(serializers.Serializer):
     def validate(self, value):
         username = value['username']
         if username == 'me':
-            raise ValidationError("Недопустимое имя")
+            raise ValidationError('Недопустимое имя')
         return value
 
 
 class ObtainTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=150
+    )
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
+
+
+class MeSerializer(serializers.ModelSerializer):
+    role = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
