@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import User  # isort: skip
-from users.serializers import UserSerializer  # isort: skip
+from api.serializers import UserSerializer  # isort: skip
 from api.permissions import IsAdmin  # isort: skip
 
 

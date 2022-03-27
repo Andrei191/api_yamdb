@@ -16,7 +16,7 @@ class Genre(models.Model):
         unique=True,
         validators=[RegexValidator(
             regex=r'^[-a-zA-Z0-9_]+$',
-            message='incorrect username')])
+            message='Недопустимый никнейм')])
 
     def __str__(self):
         return self.name

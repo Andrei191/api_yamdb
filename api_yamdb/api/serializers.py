@@ -92,18 +92,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = '__all__'
-
-
 class CustomSignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(
         required=True,
         max_length=254,
     )
-    username = serializers.CharField(required=True,)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=150
+    )
 
     class Meta:
         model = User
@@ -112,14 +110,37 @@ class CustomSignUpSerializer(serializers.Serializer):
     def validate(self, value):
         username = value['username']
         if username == 'me':
-            raise ValidationError("Недопустимое имя")
+            raise ValidationError('Недопустимое имя')
         return value
 
 
 class ObtainTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=150
+    )
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
+
+
+class MeSerializer(serializers.ModelSerializer):
+    role = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
