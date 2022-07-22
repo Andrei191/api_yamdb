@@ -72,4 +72,4 @@ chmod a+x ./<file_sh> (при импорте первой таблицы)
 ./<file_sh> (последующие запуски импортов таблиц)
 ---
 Автор:
-https://github.com/Andrei191/api_final_yatube/
+<a href="https://github.com/Andrei191
