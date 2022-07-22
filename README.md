@@ -72,4 +72,4 @@ chmod a+x ./<file_sh> (при импорте первой таблицы)
 ./<file_sh> (последующие запуски импортов таблиц)
 ---
 Автор:
-<a href="https://github.com/Andrei191
+<a href="https://github.com/Andrei191"> Карасев Андрей </a>.
