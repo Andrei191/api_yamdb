@@ -70,3 +70,6 @@ echo -e ".separator \",\"\n.mode csv\n.import  --skip 1 <file_csv> <db_table_nam
 
 chmod a+x ./<file_sh> (при импорте первой таблицы)
 ./<file_sh> (последующие запуски импортов таблиц)
+---
+Автор:
+https://github.com/Andrei191/api_final_yatube/
